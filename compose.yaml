@@ -1,0 +1,6 @@
+services:
+  tscircuit:
+    image: ghcr.io/constructorfleet/tscircuit-web:latest
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
