@@ -1,6 +1,15 @@
 services:
-  tscircuit:
+  tscircuit-web:
     image: ghcr.io/constructorfleet/tscircuit-web:latest
     ports:
       - "5173:5173"
+    restart: unless-stopped
+
+  tscircuit-cli:
+    profiles: [cli]
+    image: ghcr.io/constructorfleet/tscircuit-cli:latest
+    ports:
+      - "3020:3020"
+    volumes:
+      - ./projects:/workspace
     restart: unless-stopped

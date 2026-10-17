@@ -1,0 +1,25 @@
+FROM oven/bun:1.3.10 AS bun-runtime
+
+FROM node:24-bookworm-slim
+
+ARG TSCIRCUIT_CLI_VERSION=latest
+ENV NODE_ENV=development
+
+COPY --from=bun-runtime /usr/local/bin/bun /usr/local/bin/bun
+
+RUN npm install --global --allow-scripts=sharp "tscircuit@${TSCIRCUIT_CLI_VERSION}" \
+    && mkdir -p /workspace \
+    && chown node:node /workspace
+
+WORKDIR /workspace
+USER node
+
+COPY --chown=node:node --chmod=755 cli-entrypoint.sh /usr/local/bin/tscircuit-cli-entrypoint
+
+EXPOSE 3020
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
+  CMD bun -e 'fetch("http://127.0.0.1:3020/").then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))'
+
+ENTRYPOINT ["tscircuit-cli-entrypoint"]
+CMD ["--port", "3020"]
